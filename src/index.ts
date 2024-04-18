@@ -1,79 +1,114 @@
-type IsNothingType<T> = T extends undefined ? undefined : T
+export type Callable = (...args: any[]) => any;
 
-export interface Functor<T> {
-    map<U>(f:(value: T) => U): Functor<U>
+export interface Functor {
+    map<T>(f: (value: any) => T): Functor
 }
 
-export interface Applicative<T> extends Functor<T>{
-    pure: (value: T) => Applicative<T>
-    applicative<U>(f: (value: T) => U): Applicative<U>
+/**
+ * pure -> static 으로 구현
+ */
+export interface Applicative extends Functor {
+    // 언어 특성상 static 으로 따로 구현해야함
+    // pure<T>(value: T): Applicative
+    applicative<T>(value: T): Applicative
 }
 
-export interface Monad<T> extends Applicative<T>{
-    lift: (value: T) => Monad<T>;
-    bind<U>(f: (value: T) => Monad<U>): Monad<U>
+/**
+ * lift -> static 으로 구현
+ */
+export interface Monad<T> extends Applicative {
+    // lift<U>(value: U): Monad<U>
+    bind<U>(f: (value: any) => Monad<U>): Monad<U>
 }
 
-export class Nothing<T> {
-    private value: unknown
-
-    constructor() {
-        this.value = undefined
-    }
-
-    IsNothing(): this is Nothing<T> {
-        return true
-    }
-
-    IsJust(): this is Just<T> {
-        return false
-    }
-
-    Get() {
-        return this.value
-    }
+export interface Maybe<T> extends Monad<T> {
+    value: T | undefined
+    getValue: () => undefined | T
+    isNothing: () => boolean
+    isJust: () => boolean
 }
 
-export class Just<T> {
-    private value
-
+export class Just<T> implements Maybe<T> {
+    value: T
+    
     constructor(value: T) {
         this.value = value
     }
 
-    IsNothing(): this is Nothing<T> {
+    static pure<U>(arg: U): Maybe<U> {
+        return new Just<U>(arg)
+    }
+
+    static lift<U>(arg: U): Maybe<U> {
+        return new Just<U>(arg)
+    }
+    
+    getValue() {
+        return this.value
+    }
+
+    isNothing(): this is Nothing {
         return false
     }
 
-    IsJust(): this is Just<T> {
-        return true;
+    isJust(): this is Just<T> {
+        return true
     }
 
-    Get() {
-        return this.value
+    map<U>(f: (value: T) => U): Maybe<U> {
+        return new Just(f(this.value))
     }
-}
 
-export class Maybe<T> implements Monad<T> {
-    private value: Nothing<T> | Just<T>
-
-    constructor(value: undefined | T) {
-        if (value === undefined) {
-            this.value = new Nothing()
+    applicative<U>(arg: U): Maybe<U> {
+        if (typeof this.value === 'function') {
+            const fn = this.value as Callable
+            return new Just<U>(fn(arg))
         } else {
-            this.value = new Just(value)
+            return new Nothing<U>() as Maybe<U>
         }
     }
 
-    Get() {
+    bind<U>(f: (value: T) => Just<U>): Just<U> {
+        return f(this.value)
+    }
+}
+
+export class Nothing<T = any> implements Maybe<T> {
+    value: T | undefined = undefined
+
+    getValue(): T | undefined {
         return this.value
     }
 
-    Map<U>(f: (value: T) => U): Maybe<U> {
-        if (this.value.IsNothing()) {
-            return new Maybe<U>(undefined)
-        }
+    isNothing(): this is Nothing<T> {
+        return true
+    }
 
-        return new Maybe<U>(f(this.value.Get()))
+    isJust(): this is Just<T> {
+        return false
+    }
+
+    map<U>(f: (value: T) => U) {
+        return new Nothing()
+    }
+
+    applicative<U>(value: U): Nothing<U> {
+        return new Nothing<U>()
+    }
+
+    bind<U>(f: (value: T) => Monad<U>): Nothing<U> {
+        return new Nothing()
     }
 }
+
+const maybeValue = new Just(3)
+
+const func = <T> (a: Maybe<T>) => {
+    if (a.isNothing()) {
+        console.log('value is Nothing')
+    } else {
+        console.log('value is Just')
+    }
+}
+
+func(maybeValue)
