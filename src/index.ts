@@ -100,15 +100,3 @@ export class Nothing<T = any> implements Maybe<T> {
         return new Nothing()
     }
 }
-
-const maybeValue = new Just(3)
-
-const func = <T> (a: Maybe<T>) => {
-    if (a.isNothing()) {
-        console.log('value is Nothing')
-    } else {
-        console.log('value is Just')
-    }
-}
-
-func(maybeValue)
