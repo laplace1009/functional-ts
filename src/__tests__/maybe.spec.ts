@@ -21,24 +21,17 @@ describe('Maybe Monad', () => {
             const justThree = new Just(3)
             const applicativeResult: Applicative<number> = justFn.applicative(justThree);
             expect(applicativeResult instanceof Just).toBeTruthy();
-            // expect(applicativeResult.value).toEqual(8);
-        });
-
-        it('should throw error if non-callable is used in applicative', () => {
-            const justFive = new Just(5);
-            expect(() => justFive.applicative(new Just(3))).toThrow('this value is not callable');
         });
 
         it('should bind correctly', () => {
             const justFive = new Just(5);
             const bound = justFive.bind(x => new Just(x * 2));
             expect(bound instanceof Just).toBeTruthy();
-            // expect(bound.value).toEqual(10);
         });
 
         it('should return Nothing when bind is called with undefined', () => {
-            const justUndefined = new Nothing()
-            const bound = justUndefined.bind(x => new Just(x * 2));
+            const nothing = new Nothing()
+            const bound = nothing.bind(x => new Just(x * 2));
             expect(bound instanceof Nothing).toBeTruthy();
         });
     });

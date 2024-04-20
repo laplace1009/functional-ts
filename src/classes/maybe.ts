@@ -1,26 +1,18 @@
 import {Monad} from "../interfaces/monad";
-import {Functor} from "../interfaces/functor";
-import {Applicative} from "../interfaces/applicative";
-import {isCallable, isUndefined} from "../utils/utils";
+import {assertIsCallable} from "../utils/utils";
 
 export abstract class Maybe<T> implements Monad<T> {
-    constructor(public value?: T) {}
-
-    abstract map<U>(f: (a: T) => U): Functor<U>
-    abstract applicative<A, B>(a: Applicative<A>): Applicative<B>
-    abstract bind<U>(f: (value: T) => Monad<U>): Monad<U>
+    abstract map<U>(f: (a: T) => U): Maybe<U>
+    abstract applicative<A, B>(a: Maybe<A>): Maybe<B>
+    abstract bind<U>(f: (value: T) => Maybe<U>): Maybe<U>
 }
 
 export class Just<T> extends Maybe<T> {
-    constructor(arg: T) {
-        super(arg)
+    constructor(public value: T) {
+        super()
     }
 
-    map<U>(f: (a: T) => U): Maybe<U> {
-        if (isUndefined(this.value)) {
-            return new Nothing()
-        }
-
+    map<U>(f: (a: T) => U): Just<U> {
         return new Just(f(this.value))
     }
 
@@ -29,40 +21,29 @@ export class Just<T> extends Maybe<T> {
     }
 
     applicative<A, B>(a: Maybe<A>): Maybe<B> {
-        if (isUndefined(this.value)) {
-            return new Nothing()
-        }
-
-        if (isCallable(this.value)) {
-            return a.map(this.value) as ReturnType<typeof this.value>
-        }
-
-        throw new Error('this value is not callable')
+        assertIsCallable(this.value)
+        return a.map(this.value)
     }
 
     static wrap<U>(arg: U) {
         return this.pure(arg)
     }
 
-    bind<U>(f: (value: T) => Monad<U>): Maybe<U> {
-        if (isUndefined(this.value)) {
-            return new Nothing()
-        }
-
+    bind<U>(f: (value: T) => Just<U>): Just<U> {
         return f(this.value)
     }
 }
 
-export class Nothing extends Maybe<undefined> {
-    map<U>(f: (a: any) => U): Maybe<U> {
+export class Nothing extends Maybe<never> {
+    map<U>(f: (a: never) => U): Nothing {
         return new Nothing()
     }
 
-    applicative<U>(a: Maybe<any>): Maybe<U> {
+    applicative(a: Maybe<unknown>): Nothing {
         return new Nothing()
     }
 
-    bind<U>(f: (a: any) => Monad<U>): Maybe<U> {
+    bind<U>(f: (a: never) => Maybe<U>): Nothing {
         return new Nothing()
     }
 }
