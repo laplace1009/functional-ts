@@ -1,5 +1,6 @@
-import {Just, Nothing} from '../classes/maybe'
+
 import {Applicative} from "../interfaces/applicative";
+import {Just, Nothing} from "../classes/maybe/maybe";
 
 describe('Maybe Monad', () => {
     describe('Just', () => {
@@ -31,7 +32,7 @@ describe('Maybe Monad', () => {
 
         it('should return Nothing when bind is called with undefined', () => {
             const nothing = new Nothing()
-            const bound = nothing.bind(x => new Just(x * 2));
+            const bound = nothing.bind<number>(x => new Just(x * 2));
             expect(bound instanceof Nothing).toBeTruthy();
         });
     });
@@ -51,7 +52,7 @@ describe('Maybe Monad', () => {
 
         it('should return Nothing when bind is called', () => {
             const nothing = new Nothing();
-            const bound = nothing.bind(x => new Just(x * 2));
+            const bound = nothing.bind<number>(x => new Just(x * 2));
             expect(bound instanceof Nothing).toBeTruthy();
         });
     });

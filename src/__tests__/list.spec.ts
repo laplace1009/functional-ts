@@ -1,4 +1,4 @@
-import {Nil, Cons} from "../classes/list"
+import {Cons, Nil} from "../classes/list/list";
 
 describe('List Implementation', () => {
     describe('Nil', () => {
@@ -43,7 +43,7 @@ describe('List Implementation', () => {
     });
 
     describe('Cons', () => {
-        const list: Cons<number> = new Cons<number>(1, new Cons<number>(2, new Cons<number>(3, new Nil())));
+        const list: Cons<number> = new Cons(1, new Cons(2, new Cons(3, new Nil())));
 
         test('isEmpty should return false', () => {
             expect(list.isEmpty()).toBe(false);
