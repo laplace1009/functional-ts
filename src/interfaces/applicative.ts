@@ -1,9 +1,10 @@
 import {Functor} from "./functor";
+import {TypeOrReturnType} from "../types/types";
 
 /**
  * pure -> static 으로 구현
  */
-export interface Applicative<F> extends Functor<F> {
+export interface Applicative<T> extends Functor<T> {
     // pure<T>(value: T): Applicative
-    applicative<A, B>(a: Applicative<A>): Applicative<B>
+    ap<A>(a: A): Functor<TypeOrReturnType<T>>
 }

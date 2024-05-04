@@ -20,7 +20,7 @@ describe('Maybe Monad', () => {
         it('should handle applicative correctly when function is stored', () => {
             const justFn = new Just((x: number) => x + 5);
             const justThree = new Just(3)
-            const applicativeResult: Applicative<number> = justFn.applicative(justThree);
+            const applicativeResult: Applicative<number> = justFn.ap(justThree);
             expect(applicativeResult instanceof Just).toBeTruthy();
         });
 
@@ -46,7 +46,7 @@ describe('Maybe Monad', () => {
 
         it('should return Nothing when applicative is called', () => {
             const nothing = new Nothing();
-            const applicativeResult = nothing.applicative(new Just(3));
+            const applicativeResult = nothing.ap(new Just(3));
             expect(applicativeResult instanceof Nothing).toBeTruthy();
         });
 

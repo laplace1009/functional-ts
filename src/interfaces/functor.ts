@@ -1,3 +1,5 @@
-export interface Functor<F> {
-    map<G>(f: (a: F) => G): Functor<G>
+import {CallableAtoB} from "../types/types";
+
+export interface Functor<T> {
+    map<A>(f: CallableAtoB<T, A>): Functor<A>
 }

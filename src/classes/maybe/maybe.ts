@@ -1,49 +1,53 @@
 import {Monad} from "../../interfaces/monad"
 import {assertCallable} from "../../utils/utils"
+import {TypeOrReturnType} from "../../types/types";
 
 export abstract class Maybe<T> implements Monad<T> {
-    abstract map<U>(f: (a: T) => U): Nothing | Just<U>
-    abstract applicative<A, B>(a: Nothing | Just<A>): Nothing | Just<B>
-    abstract bind<U>(f: (value: T) => Nothing | Just<U>): Nothing | Just<U>
+    abstract map<A>(f: (a: T) => A): Maybe<A>
+    abstract ap<A>(a: A): Maybe<TypeOrReturnType<T>>
+    abstract bind<A>(f: (value: T) => Maybe<A>): Maybe<A>
 }
 
-export class Nothing extends Maybe<never> {
-    map<U>(f: (a: never) => U): Nothing {
-        return new Nothing()
+export class Nothing<T> extends Maybe<T> {
+    map<A>(f: (a: T) => A): Nothing<A> {
+        return new Nothing<A>()
     }
 
-    applicative<U>(a: Nothing | Just<U>): Nothing {
-        return new Nothing()
+    ap<A>(a: A): Nothing<TypeOrReturnType<T>> {
+        return new Nothing<TypeOrReturnType<T>>()
     }
 
-    bind<U>(f: (a: U) => Nothing | Just<U>): Nothing {
-        return new Nothing()
+    bind<A>(f: (a: T) => Nothing<A>): Nothing<A> {
+        return new Nothing<A>()
     }
 }
 
 export class Just<T> extends Maybe<T> {
-    constructor(public value: T) {
+    constructor(public readonly value: T) {
         super()
     }
 
-    map<U>(f: (a: T) => U): Just<U> {
-        return new Just(f(this.value))
+    map<A>(f: (a: T) => A): Just<A> {
+        return new Just<A>(f(this.value))
     }
 
-    static pure<U>(arg: U) {
-        return new Just<U>(arg);
+    static pure<A>(arg: A): Just<A> {
+        return new Just<A>(arg);
     }
 
-    applicative<A, B>(a: Nothing | Just<A>): Nothing | Just<B> {
+    ap<A>(a: A): Maybe<TypeOrReturnType<T>> {
         assertCallable(this.value)
-        return a.map(this.value)
+        if (a instanceof Maybe) {
+            return a.map(this.value)
+        }
+        throw new TypeError('Argument is not a Maybe');
     }
 
-    static wrap<U>(arg: U): Just<U> {
-        return this.pure(arg)
+    static wrap<A>(arg: A): Just<A> {
+        return this.pure<A>(arg)
     }
 
-    bind<U>(f: (value: T) => Nothing | Just<U>): Nothing | Just<U> {
+    bind<U>(f: (value: T) => Maybe<U>): Maybe<U> {
         return f(this.value)
     }
 }
