@@ -47,7 +47,7 @@ export class Just<T> extends Maybe<T> {
 
     ap<A>(a: A): Maybe<TypeOrReturnType<T>> {
         assertCallable(this.value)
-        if (a instanceof Maybe) {
+        if (isMaybe(a)) {
             return a.map(this.value)
         }
         throw new TypeError('Argument is not a Maybe');
@@ -62,3 +62,4 @@ export class Just<T> extends Maybe<T> {
     }
 }
 
+const isMaybe = (a: unknown): a is Maybe<unknown> => a instanceof Maybe;
