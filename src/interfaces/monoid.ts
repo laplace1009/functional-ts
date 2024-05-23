@@ -1,8 +1,7 @@
-import {Semi} from "./semigroup";
-import {Unit} from "../types/types";
+import {SemiGroup} from "./semigroup";
 
-export interface Monoid<T> extends Semi<T> {
-    mempty<U>(): Monoid<U>
+export interface Monoid<T> extends SemiGroup<T> {
+    mempty(): Monoid<T>
     mappend(a: Monoid<T>): Monoid<T>
-    mconcat(): Unit | Monoid<T>
+    mconcat(): Monoid<T>
 }

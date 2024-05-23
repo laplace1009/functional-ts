@@ -1,1 +1,1 @@
-interface NonEmpty {}
+export interface NonEmpty {}

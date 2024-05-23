@@ -1,153 +1,116 @@
-import {Foldable} from "../../interfaces/foldable";
 import {Monad} from "../../interfaces/monad";
-import {assertCallable, assertIs2DList} from "../../utils/utils";
+import {Foldable} from "../../interfaces/foldable";
 import {Monoid} from "../../interfaces/monoid";
-import {TypeOrReturnType, Unit} from "../../types/types";
+import {NonEmpty} from "../../interfaces/nonEmpty";
 
-export abstract class List<T> implements Foldable<T>, Monad<T>, Monoid<T> {
+abstract class List<T> implements Monad<T>, Foldable<T>, Monoid<T> {
     abstract isEmpty(): boolean
-
     abstract head(): T
-
-    abstract last(): T
-
     abstract tail(): List<T>
-
-    abstract clone(): List<T>
-
-    abstract append(list: List<T>): List<T>
-
     abstract length(): number
-
     abstract filter(predict: (a: T) => boolean): List<T>
-
-    abstract fold<U>(f: (a: U, b: T) => U, init: U): U
-
-    abstract map<U>(f: (a: T) => U): List<U>
-
+    abstract map<A>(fn: (a: T) => A): List<A>
     abstract pure<A>(a: A): List<A>
-
-    abstract ap<A>(a: A): List<TypeOrReturnType<T>>
-
+    abstract ap<A, B>(this: List<(a: A) => B>, a: List<A>): List<B>
     abstract wrap<A>(a: A): List<A>
-
-    abstract bind<U>(f: (a: T) => List<U>): List<U>
-
-    abstract sappend(a?: NonEmpty): List<T>
-
+    abstract bind<A>(fn: (a: T) => List<A>): List<A>
+    abstract clone(): List<T>
+    abstract append(a: List<T>): List<T>
+    abstract fold<A>(fn: (a: A, b: T) => A, init: A): A
+    abstract sappend(a: List<T>): List<T>
     abstract mempty(): List<T>
-
     abstract mappend(a: List<T>): List<T>
-
-    abstract mconcat(): Unit | List<T>
+    abstract mconcat(this: List<List<T>>): List<T>
 }
 
-export class Nil<T> extends List<T> {
+class Nil<T> extends List<T> {
     constructor() {
         super();
     }
-
     isEmpty(): boolean {
         return true;
     }
 
     head(): T {
-        throw new Error('empty list');
-    }
-
-    last(): T {
-        throw new Error('empty list');
+        throw new TypeError('empty list')
     }
 
     tail(): List<T> {
-        throw new Error('empty list');
-    }
-
-    clone(): Nil<T> {
-        return new Nil<T>();
-    }
-
-    append(list: List<T>): List<T> {
-        return list;
+        throw new TypeError('empty list')
     }
 
     length(): number {
         return 0;
     }
 
-    filter(f: (a: T) => boolean): Nil<T> {
+    filter(predict: (a: T) => boolean): List<T> {
+        return new Nil<T>()
+    }
+
+    map<A>(fn: (a: T) => A): Nil<A> {
+        return new Nil<A>()
+    }
+
+    pure<A>(a: A): Cons<A> {
+        return new Cons<A>(a, new Nil<A>());
+    }
+
+    ap<A, B>(this: Nil<(a: A) => B>, a: List<A>): List<B> {
+        return new Nil<B>()
+    }
+
+    wrap<A>(a: A): Cons<A> {
+        return this.pure(a)
+    }
+
+    bind<A>(fn: (a: T) => List<A>): Nil<A> {
+        return new Nil<A>()
+    }
+
+    clone(): Nil<T> {
         return new Nil<T>();
     }
 
-    fold<A>(f: (a: A, b: T) => A, init: A): A {
+    append(a: List<T>): List<T> {
+        return a;
+    }
+
+    fold<A>(fn: (a: A, b: T) => A, init: A): A {
         return init;
     }
 
-    pure<A>(arg: A): Cons<A> {
-        return new Cons<A>(arg, new Nil<A>())
+    sappend(a: List<T>): List<T> {
+        return a.clone();
     }
 
-    map<U>(f: (a: T) => U): Nil<U> {
-        return new Nil<U>()
-    }
-
-    ap<A>(a: A): List<TypeOrReturnType<T>> {
-        throw new TypeError('empty list');
-    }
-
-    wrap<A>(arg: A): Cons<A> {
-        return this.pure<A>(arg);
-    }
-
-    bind<U>(f: (a: T) => Nil<U>): Nil<U> {
-        return new Nil()
-    }
-
-    sappend(a?: NonEmpty): Nil<T> {
-        throw new TypeError('Empty List');
-    }
-
-    mempty<U>(): Nil<U> {
-        return new Nil<U>()
+    mempty(): Nil<T> {
+        return new Nil<T>()
     }
 
     mappend(a: List<T>): List<T> {
-        return this.append(a)
+        return this.sappend(a)
     }
 
-    mconcat(): Unit {
-        return;
+    mconcat(): List<T> {
+        return new Nil<T>()
     }
 }
 
-export class Cons<T> extends List<T> implements NonEmpty {
-    constructor(public value: T, public next: List<T>) {
+class Cons<T> extends List<T> implements NonEmpty {
+    constructor(public readonly value: T, public readonly next: List<T>) {
         super()
     }
 
     isEmpty(): boolean {
-        return false;
+        return false
     }
 
     head(): T {
-        return this.value;
-    }
-
-    last(): T {
-        if (this.next instanceof Nil) return this.value
-        return this.next.last()
+        return this.value
     }
 
     tail(): List<T> {
-        return this.next
-    }
-
-    clone(): Cons<T> {
-        return new Cons<T>(this.value, this.next.clone())
-    }
-
-    append(list: List<T>): Cons<T> {
-        return new Cons<T>(this.value, this.next.append(list));
+        return this.next.clone()
     }
 
     length(): number {
@@ -155,60 +118,59 @@ export class Cons<T> extends List<T> implements NonEmpty {
     }
 
     filter(predict: (a: T) => boolean): List<T> {
-        if (predict(this.value)) {
-            return new Cons<T>(this.value, this.next.filter(predict))
-        }
-
-        return this.next.filter(predict)
+        return predict(this.value) ?
+            new Cons<T>(this.value, this.next.filter(predict)) : this.next.filter(predict)
     }
 
-    fold<U>(f: (a: U, b: T) => U, init: U): U {
-        return this.next.fold(f, f(init, this.value))
-    }
-
-    map<U>(f: (a: T) => U): Cons<U> {
-        return new Cons(f(this.value), this.next.map(f))
+    map<A>(fn: (a: T) => A): Cons<A> {
+        return new Cons(fn(this.value), this.next.map(fn))
     }
 
     pure<A>(a: A): Cons<A> {
-        return new Cons<A>(a, new Nil<A>())
+        return new Cons<A>(a, new Nil<A>());
     }
 
-    ap<A>(a: A): List<TypeOrReturnType<T>>  {
-        assertCallable(this.value)
-        if (a instanceof List) {
-            return a.map(this.value)
-        }
-        throw new TypeError('argument is not a list');
+    ap<A, B>(this: Cons<(a: A) => B>, a: List<A>): List<B> {
+        return a.map(this.value)
     }
 
     wrap<A>(a: A): Cons<A> {
         return this.pure(a)
     }
 
-    bind<U>(f: (a: T) => List<U>): List<U> {
-        return concat(this.map(f))
+    bind<A>(fn: (a: T) => List<A>): List<A> {
+        return concat(this.map(fn));
     }
 
-    sappend(a: Cons<T>): Cons<T> {
-        return this.append(a)
+    clone(): Cons<T> {
+        return new Cons<T>(this.value, this.next.clone())
     }
 
-    mempty<U>(): Nil<U> {
-        return new Nil<U>()
+    append(a: List<T>): Cons<T> {
+        return new Cons<T>(this.value, this.next.append(a))
+    }
+
+    fold<A>(fn: (a: A, b: T) => A, init: A): A {
+        return this.next.fold(fn, fn(init, this.value))
+    }
+
+    sappend(a: List<T>): Cons<T> {
+        return this.append(a);
+    }
+
+    mempty(): Nil<T> {
+        return new Nil<T>()
     }
 
     mappend(a: List<T>): List<T> {
-        return this.append(a)
+        return this.sappend(a);
     }
 
-    mconcat(): List<T> {
-        assertIs2DList(this)
-        return concat(this)
+    mconcat(this: List<List<T>>): List<T> {
+        return concat(this);
     }
 }
 
-export const concat = <T>(list: Cons<List<T>>) => {
-    return list.fold((a:List<T>, b:List<T>) => a.append(b), new Nil())
+const concat = <T> (list: List<List<T>>): List<T> => {
+    return list.fold((a: List<T>, b: List<T>) => a.append(b), new Nil<T>());
 }
-

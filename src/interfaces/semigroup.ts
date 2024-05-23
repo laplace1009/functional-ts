@@ -1,3 +1,3 @@
-export interface Semi<T> {
-    sappend(a?: NonEmpty): Semi<T>;
+export interface SemiGroup<T> {
+    sappend(a: SemiGroup<T>): SemiGroup<T>
 }
