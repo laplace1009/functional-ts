@@ -3,7 +3,7 @@ import {Foldable} from "../../interfaces/foldable";
 import {Monoid} from "../../interfaces/monoid";
 import {NonEmpty} from "../../interfaces/nonEmpty";
 
-abstract class List<T> implements Monad<T>, Foldable<T>, Monoid<T> {
+export abstract class List<T> implements Monad<T>, Foldable<T>, Monoid<T> {
     abstract isEmpty(): boolean
     abstract head(): T
     abstract tail(): List<T>
@@ -23,7 +23,7 @@ abstract class List<T> implements Monad<T>, Foldable<T>, Monoid<T> {
     abstract mconcat(this: List<List<T>>): List<T>
 }
 
-class Nil<T> extends List<T> {
+export class Nil<T> extends List<T> {
     constructor() {
         super();
     }
@@ -43,7 +43,7 @@ class Nil<T> extends List<T> {
         return 0;
     }
 
-    filter(predict: (a: T) => boolean): List<T> {
+    filter(predict: (a: T) => boolean): Nil<T> {
         return new Nil<T>()
     }
 
@@ -55,12 +55,12 @@ class Nil<T> extends List<T> {
         return new Cons<A>(a, new Nil<A>());
     }
 
-    ap<A, B>(this: Nil<(a: A) => B>, a: List<A>): List<B> {
+    ap<A, B>(this: Nil<(a: A) => B>, a: List<A>): Nil<B> {
         return new Nil<B>()
     }
 
     wrap<A>(a: A): Cons<A> {
-        return this.pure(a)
+        return this.pure<A>(a)
     }
 
     bind<A>(fn: (a: T) => List<A>): Nil<A> {
@@ -96,7 +96,7 @@ class Nil<T> extends List<T> {
     }
 }
 
-class Cons<T> extends List<T> implements NonEmpty {
+export class Cons<T> extends List<T> implements NonEmpty {
     constructor(public readonly value: T, public readonly next: List<T>) {
         super()
     }
@@ -135,7 +135,7 @@ class Cons<T> extends List<T> implements NonEmpty {
     }
 
     wrap<A>(a: A): Cons<A> {
-        return this.pure(a)
+        return this.pure<A>(a)
     }
 
     bind<A>(fn: (a: T) => List<A>): List<A> {
@@ -171,6 +171,12 @@ class Cons<T> extends List<T> implements NonEmpty {
     }
 }
 
-const concat = <T> (list: List<List<T>>): List<T> => {
-    return list.fold((a: List<T>, b: List<T>) => a.append(b), new Nil<T>());
+export const isCons = <T>(a: List<T>): a is Cons<T> => a instanceof Cons
+
+export const concat = <T> (list: Foldable<List<T>>): List<T> => {
+    return list.fold((acc: List<T>, cur: List<T>) => acc.append(cur), new Nil<T>());
+}
+
+export const concatMap = <T, U> (fn: (a: T) => List<U>, list: Foldable<T>): List<U> => {
+    return list.fold((acc: List<U>, cur: T) => acc.append(fn(cur)), new Nil<U>())
 }

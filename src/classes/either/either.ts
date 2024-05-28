@@ -1,74 +1,96 @@
-import {CallableAtoB, TypeOrReturnType} from "../../types/types";
 import {Monad} from "../../interfaces/monad";
-import {assertCallable} from "../../utils/utils";
 
-export abstract class Either<L, R> implements Monad<L | R>{
+abstract class Either<L, R> implements Monad<R> {
     abstract isLeft(): boolean
     abstract isRight(): boolean
-    abstract either<A>(f:CallableAtoB<L | R, A>): A;
-    abstract map<A>(f: CallableAtoB<L | R, A>): Either<A, never> | Either<never, A>
-    abstract pure<A>(a: A): Either<never, A>
-    abstract ap<A>(a: A): Either<TypeOrReturnType<L | R>, never> | Either<never, TypeOrReturnType<L | R>>
-    abstract wrap<A>(a: A): Either<never, A>
-    abstract bind<A>(f: CallableAtoB<L | R, Either<L, never> | Either<never, A>>): Either<L, never> | Either<never, A>
+    abstract fromLeft<A>(a: A): A | L
+    abstract fromRight<A>(a: A): A | R
+    abstract map<A>(fn: (a: R) => A): Either<L, A>;
+    abstract pure<A>(a: A): Either<L, A>
+    abstract ap<A, B>(this: Either<L, (a: A) => B>, a: Either<L, A>): Either<L, B>;
+    abstract wrap<A>(a: A): Either<L, A>
+    abstract bind<A>(fn: (a: R) => Either<L, A>): Either<L, A>
 }
 
-export class Left<L> extends Either<L, never> {
+class Left<L, R> extends Either<L, R> {
     constructor(public readonly value: L) {
         super();
     }
-    isLeft(): boolean {
-        return true;
+
+    isLeft() {
+        return true
     }
 
-    isRight(): boolean {
+    isRight() {
         return false;
     }
 
-    either<A>(f: CallableAtoB<L, A>): A {
-        return f(this.value)
+    fromLeft<A>(a: A): L {
+        return this.value
     }
 
-    map<A>(f: CallableAtoB<L, A>): Left<L> {
-        return new Left<L>(this.value)
+    fromRight<A>(a: A): A {
+        return a
     }
 
-    pure<A>(a: A): Right<A> {
-        return new Right<A>(a)
+    map<A>(fn: (a: R) => A): Either<L, A> {
+        return new Left<L, A>(this.value)
+    }
+    pure<A>(a: A): Right<L, A> {
+        return new Right<L, A>(a)
     }
 
-    ap<A>(a: A): Left<TypeOrReturnType<L>> {
-        assertCallable(this.value)
-        if (isLeft(a))
-        return new Left<TypeOrReturnType<L>>(this.value)
+    ap<A, B>(a: Either<any, any>): Left<L, B> {
+        return new Left<L, B>(this.value)
     }
 
-    wrap<A>(a: A): Either<never, A> {
+    wrap<A>(a: A): Right<L, A> {
         return this.pure(a)
     }
 
-    bind<A>(f: CallableAtoB<L, Left<A>>): Left<L> {
-        return this.map(f).value
+    bind<A>(fn: (a: R) => Either<L, A>): Either<L, A> {
+        return new Left<L, A>(this.value)
     }
 }
 
-export class Right<R> extends Either<never, R> {
+class Right<L, R> extends Either<L, R> {
     constructor(public readonly value: R) {
         super();
     }
 
-    isLeft(): boolean {
-        return false;
+    isLeft() {
+        return false
     }
 
-    isRight(): boolean {
-        return true;
+    isRight() {
+        return true
     }
 
-    either<A>(f: CallableAtoB<R, A>): A {
-        return f(this.value)
+    fromLeft<A>(a: A): A {
+        return a
     }
 
+    fromRight<A>(a: A): R {
+        return this.value
+    }
+
+    map<A>(fn: (a: R) => A): Either<L, A> {
+        return new Right<L, A>(fn(this.value))
+    }
+
+    pure<A>(a: A): Right<L, A> {
+        return new Right<L, A>(a)
+    }
+
+    ap<A, B>(this: Right<L, (a: A) => B>, a: Either<L, A>): Either<L, B> {
+        return a.map(this.value)
+    }
+
+    wrap<A>(a: A): Right<L, A> {
+        return this.pure(a)
+    }
+
+    bind<A>(fn: (a: R) => Either<L, A>): Either<L, A> {
+        return fn(this.value)
+    }
 }
-
-const isLeft = (a:unknown): a is Left<unknown> => a instanceof Left

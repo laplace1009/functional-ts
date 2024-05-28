@@ -1,17 +1,57 @@
-import {Monad} from "../../interfaces/monad"
-import {assertCallable} from "../../utils/utils"
-import {TypeOrReturnType} from "../../types/types";
+import {Monad} from "../../interfaces/monad";
+import {Cons, isCons, List, Nil} from "../list/list";
 
-export abstract class Maybe<T> implements Monad<T> {
-    abstract map<A>(f: (a: T) => A): Maybe<A>
+export const isJust = <T>(a: Maybe<T>): a is Just<T> => a instanceof Just
+
+abstract class Maybe<T> implements Monad<T> {
+    static catMaybes<T>(a: List<Maybe<T>>): List<T> {
+        const helper = (acc: List<T>, cur: List<Maybe<T>>): List<T> => {
+            if (isCons(cur)) {
+                if (isJust<T>(cur.value)) {
+                    const newList = new Cons<T>(cur.value.value, acc)
+                    return helper(newList, cur.next)
+                }
+                return helper(acc,cur.next)
+            }
+            return acc
+        }
+        return helper(new Nil<T>(), a)
+    }
+
+    abstract isNothing(): boolean
+    abstract isJust(): boolean
+    abstract fromJust<A>(a: A): A | T
+    abstract fromMaybe<A>(a: A): A | T
+    abstract maybeToList(): List<T>
+    abstract map<A>(fn: (a: T) => A): Maybe<A>
     abstract pure<A>(a: A): Maybe<A>
-    abstract ap<A>(a: A): Maybe<TypeOrReturnType<T>>
+    abstract ap<A, B>(this: Maybe<(a: A) => B>, a: Maybe<A>): Maybe<B>
     abstract wrap<A>(a: A): Maybe<A>
-    abstract bind<A>(f: (value: T) => Maybe<A>): Maybe<A>
+    abstract bind<A>(fn: (a: T) => Maybe<A>): Maybe<A>
 }
 
 export class Nothing<T> extends Maybe<T> {
-    map<A>(f: (a: T) => A): Nothing<A> {
+    isNothing(): boolean {
+        return true
+    }
+
+    isJust(): boolean {
+        return false
+    }
+
+    fromJust<A>(a: A): T {
+        throw new TypeError('this is not instanceOf Just')
+    }
+
+    fromMaybe<A>(a: A): A {
+        return a
+    }
+
+    maybeToList(): Nil<T> {
+        return new Nil<T>()
+    }
+
+    map<A>(fn: (a: T) => A): Nothing<A> {
         return new Nothing<A>()
     }
 
@@ -19,47 +59,61 @@ export class Nothing<T> extends Maybe<T> {
         return new Just<A>(a)
     }
 
-    ap<A>(a: A): Nothing<TypeOrReturnType<T>> {
-        return new Nothing<TypeOrReturnType<T>>()
+    ap<A, B>(this: Nothing<(a: A) => B>, a: Maybe<A>): Nothing<B> {
+        return new Nothing<B>()
     }
 
-    wrap<A>(a: A): Just<A> {
-        return this.pure(a)
+    wrap<A>(a: A): Maybe<A> {
+        return this.pure(a);
     }
 
-    bind<A>(f: (a: T) => Nothing<A>): Nothing<A> {
+    bind<A>(fn: (a: T) => Nothing<A>): Nothing<A> {
         return new Nothing<A>()
     }
 }
 
 export class Just<T> extends Maybe<T> {
     constructor(public readonly value: T) {
-        super()
+        super();
     }
 
-    map<A>(f: (a: T) => A): Just<A> {
-        return new Just<A>(f(this.value))
+    isNothing(): boolean {
+        return false;
     }
 
-    pure<A>(arg: A): Just<A> {
-        return new Just<A>(arg);
+    isJust(): boolean {
+        return true
     }
 
-    ap<A>(a: A): Maybe<TypeOrReturnType<T>> {
-        assertCallable(this.value)
-        if (isMaybe(a)) {
-            return a.map(this.value)
-        }
-        throw new TypeError('Argument is not a Maybe');
+    fromJust<A>(a: A): T {
+        return this.value
     }
 
-    wrap<A>(arg: A): Just<A> {
-        return this.pure<A>(arg)
+    fromMaybe<A>(a: A): T {
+        return this.value
     }
 
-    bind<U>(f: (value: T) => Maybe<U>): Maybe<U> {
-        return f(this.value)
+    maybeToList(): Cons<T> {
+        return new Cons<T>(this.value, new Nil<T>())
+    }
+
+    map<A>(fn: (a: T) => A): Just<A> {
+        return new Just<A>(fn(this.value))
+    }
+
+    pure<A>(a: A): Just<A> {
+        return new Just<A>(a)
+    }
+
+    ap<A, B>(this: Just<(a: A) => B>, a: Maybe<A>): Maybe<B> {
+        return a.map(this.value)
+    }
+
+    wrap<A>(a: A): Maybe<A> {
+        return this.pure(a);
+    }
+
+    bind<A>(fn: (a: T) => Just<A>): Just<A> {
+        return fn(this.value)
     }
 }
-
-const isMaybe = (a: unknown): a is Maybe<unknown> => a instanceof Maybe;
