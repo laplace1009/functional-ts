@@ -40,7 +40,7 @@ export class Nil<T> extends List<T> {
     }
 
     length(): number {
-        return 0;
+        return 0
     }
 
     filter(predict: (a: T) => boolean): Nil<T> {
