@@ -1,5 +1,5 @@
-import {Monad} from "../../interfaces/monad";
-import {Cons, isCons, List, Nil} from "../list/list";
+import {Monad} from "../interfaces/monad";
+import {Cons, isCons, List, Nil} from "./list";
 
 export const isJust = <T>(a: Maybe<T>): a is Just<T> => a instanceof Just
 

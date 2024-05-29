@@ -1,4 +1,4 @@
-import {Monad} from "../../interfaces/monad";
+import {Monad} from "../interfaces/monad";
 
 abstract class Either<L, R> implements Monad<R> {
     abstract isLeft(): boolean

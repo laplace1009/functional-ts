@@ -1,7 +1,7 @@
-import {Monad} from "../../interfaces/monad";
-import {Foldable} from "../../interfaces/foldable";
-import {Monoid} from "../../interfaces/monoid";
-import {NonEmpty} from "../../interfaces/nonEmpty";
+import {Monad} from "../interfaces/monad";
+import {Foldable} from "../interfaces/foldable";
+import {Monoid} from "../interfaces/monoid";
+import {NonEmpty} from "../interfaces/nonEmpty";
 
 export abstract class List<T> implements Monad<T>, Foldable<T>, Monoid<T> {
     abstract isEmpty(): boolean
