@@ -7,7 +7,7 @@ describe('Maybe Monad', () => {
             const nothing = new Nothing<number>();
             expect(nothing.isNothing()).toBe(true);
             expect(nothing.isJust()).toBe(false);
-        })
+        });
 
         it('should return Nothing when fromJust is called', () => {
             const nothing = new Nothing<number>();
@@ -16,18 +16,18 @@ describe('Maybe Monad', () => {
 
             expect(() => { nothing.fromJust(1); })
                 .toThrow('this is not instanceOf Just');
-        })
+        });
 
         it('should return Nothing when fromMaybe is called', () => {
             const nothing = new Nothing<number>();
             expect(nothing.fromMaybe(1)).toBe(1);
-        })
+        });
 
         it('should return Nothing when maybeToList is called', () => {
             const nothing = new Nothing<number>();
-            const maybeToList = nothing.maybeToList()
+            const maybeToList = nothing.maybeToList();
             expect(maybeToList instanceof Nil).toBeTruthy();
-        })
+        });
 
         it('should return Nothing when map is called', () => {
             const nothing = new Nothing<number>();
@@ -39,11 +39,11 @@ describe('Maybe Monad', () => {
             const nothing = new Nothing<number>();
             const pureValue = nothing.pure(5);
             expect(pureValue instanceof Just).toBeTruthy();
-        })
+        });
 
         it('should return Nothing when applicative is called', () => {
             const nothingFn = new Nothing<(a: number) => number>();
-            const applicativeResult = nothingFn.ap(new Just<number>(2))
+            const applicativeResult = nothingFn.ap(new Just<number>(2));
             expect(applicativeResult instanceof Nothing).toBeTruthy();
         });
 
@@ -51,7 +51,7 @@ describe('Maybe Monad', () => {
             const nothing = new Nothing<number>();
             const wrapValue = nothing.wrap(10);
             expect(wrapValue instanceof Just).toBeTruthy();
-        })
+        });
 
         it('should return Nothing when bind is called', () => {
             const nothing = new Nothing<number>();
@@ -79,7 +79,7 @@ describe('Maybe Monad', () => {
 
         it('should return Just when maybeToList is called', () => {
             const just = new Just<number>(7);
-            const maybeToList = just.maybeToList()
+            const maybeToList = just.maybeToList();
             expect(maybeToList instanceof Cons).toBeTruthy();
         });
 
@@ -97,7 +97,7 @@ describe('Maybe Monad', () => {
 
         it('should return Just when applicative is called', () => {
             const justFn = new Just((x: number) => x + 5);
-            const justThree = new Just(3)
+            const justThree = new Just(3);
             const applicativeResult = justFn.ap(justThree);
             expect(applicativeResult instanceof Just).toBeTruthy();
         });
@@ -106,7 +106,7 @@ describe('Maybe Monad', () => {
             const justThree = new Just(3);
             const just = justThree.wrap('test');
             expect(just.value).toBe('test');
-        })
+        });
 
         it('should return Just when bind is called', () => {
             const justFive = new Just(5);

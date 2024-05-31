@@ -18,7 +18,7 @@ class Left<L, R> extends Either<L, R> {
     }
 
     isLeft() {
-        return true
+        return true;
     }
 
     isRight() {
@@ -26,30 +26,30 @@ class Left<L, R> extends Either<L, R> {
     }
 
     fromLeft<A>(a: A): L {
-        return this.value
+        return this.value;
     }
 
     fromRight<A>(a: A): A {
-        return a
+        return a;
     }
 
     map<A>(fn: (a: R) => A): Either<L, A> {
-        return new Left<L, A>(this.value)
+        return new Left<L, A>(this.value);
     }
     pure<A>(a: A): Right<L, A> {
-        return new Right<L, A>(a)
+        return new Right<L, A>(a);
     }
 
     ap<A, B>(a: Either<any, any>): Left<L, B> {
-        return new Left<L, B>(this.value)
+        return new Left<L, B>(this.value);
     }
 
     wrap<A>(a: A): Right<L, A> {
-        return this.pure(a)
+        return this.pure(a);
     }
 
     bind<A>(fn: (a: R) => Either<L, A>): Either<L, A> {
-        return new Left<L, A>(this.value)
+        return new Left<L, A>(this.value);
     }
 }
 
@@ -59,38 +59,38 @@ class Right<L, R> extends Either<L, R> {
     }
 
     isLeft() {
-        return false
+        return false;
     }
 
     isRight() {
-        return true
+        return true;
     }
 
     fromLeft<A>(a: A): A {
-        return a
+        return a;
     }
 
     fromRight<A>(a: A): R {
-        return this.value
+        return this.value;
     }
 
     map<A>(fn: (a: R) => A): Either<L, A> {
-        return new Right<L, A>(fn(this.value))
+        return new Right<L, A>(fn(this.value));
     }
 
     pure<A>(a: A): Right<L, A> {
-        return new Right<L, A>(a)
+        return new Right<L, A>(a);
     }
 
     ap<A, B>(this: Right<L, (a: A) => B>, a: Either<L, A>): Either<L, B> {
-        return a.map(this.value)
+        return a.map(this.value);
     }
 
     wrap<A>(a: A): Right<L, A> {
-        return this.pure(a)
+        return this.pure(a);
     }
 
     bind<A>(fn: (a: R) => Either<L, A>): Either<L, A> {
-        return fn(this.value)
+        return fn(this.value);
     }
 }

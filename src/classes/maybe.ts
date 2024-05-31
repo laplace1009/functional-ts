@@ -9,13 +9,13 @@ abstract class Maybe<T> implements Monad<T> {
             if (isCons(cur)) {
                 if (isJust<T>(cur.value)) {
                     const newList = new Cons<T>(cur.value.value, acc)
-                    return helper(newList, cur.next)
+                    return helper(newList, cur.next);
                 }
-                return helper(acc,cur.next)
+                return helper(acc,cur.next);
             }
-            return acc
+            return acc;
         }
-        return helper(new Nil<T>(), a)
+        return helper(new Nil<T>(), a);
     }
 
     abstract isNothing(): boolean
@@ -32,35 +32,35 @@ abstract class Maybe<T> implements Monad<T> {
 
 export class Nothing<T> extends Maybe<T> {
     isNothing(): boolean {
-        return true
+        return true;
     }
 
     isJust(): boolean {
-        return false
+        return false;
     }
 
     fromJust<A>(a: A): T {
-        throw new TypeError('this is not instanceOf Just')
+        throw new TypeError('this is not instanceOf Just');
     }
 
     fromMaybe<A>(a: A): A {
-        return a
+        return a;
     }
 
     maybeToList(): Nil<T> {
-        return new Nil<T>()
+        return new Nil<T>();
     }
 
     map<A>(fn: (a: T) => A): Nothing<A> {
-        return new Nothing<A>()
+        return new Nothing<A>();
     }
 
     pure<A>(a: A): Just<A> {
-        return new Just<A>(a)
+        return new Just<A>(a);
     }
 
     ap<A, B>(this: Nothing<(a: A) => B>, a: Maybe<A>): Nothing<B> {
-        return new Nothing<B>()
+        return new Nothing<B>();
     }
 
     wrap<A>(a: A): Just<A> {
@@ -68,7 +68,7 @@ export class Nothing<T> extends Maybe<T> {
     }
 
     bind<A>(fn: (a: T) => Maybe<A>): Nothing<A> {
-        return new Nothing<A>()
+        return new Nothing<A>();
     }
 }
 
@@ -82,31 +82,31 @@ export class Just<T> extends Maybe<T> {
     }
 
     isJust(): boolean {
-        return true
+        return true;
     }
 
     fromJust<A>(a: A): T {
-        return this.value
+        return this.value;
     }
 
     fromMaybe<A>(a: A): T {
-        return this.value
+        return this.value;
     }
 
     maybeToList(): Cons<T> {
-        return new Cons<T>(this.value, new Nil<T>())
+        return new Cons<T>(this.value, new Nil<T>());
     }
 
     map<A>(fn: (a: T) => A): Just<A> {
-        return new Just<A>(fn(this.value))
+        return new Just<A>(fn(this.value));
     }
 
     pure<A>(a: A): Just<A> {
-        return new Just<A>(a)
+        return new Just<A>(a);
     }
 
     ap<A, B>(this: Just<(a: A) => B>, a: Maybe<A>): Maybe<B> {
-        return a.map(this.value)
+        return a.map(this.value);
     }
 
     wrap<A>(a: A): Just<A> {
@@ -114,6 +114,6 @@ export class Just<T> extends Maybe<T> {
     }
 
     bind<A>(fn: (a: T) => Maybe<A>): Maybe<A> {
-        return fn(this.value)
+        return fn(this.value);
     }
 }

@@ -32,23 +32,23 @@ export class Nil<T> extends List<T> {
     }
 
     head(): T {
-        throw new TypeError('empty list')
+        throw new TypeError('empty list');
     }
 
     tail(): List<T> {
-        throw new TypeError('empty list')
+        throw new TypeError('empty list');
     }
 
     length(): number {
-        return 0
+        return 0;
     }
 
     filter(predict: (a: T) => boolean): Nil<T> {
-        return new Nil<T>()
+        return new Nil<T>();
     }
 
     map<A>(fn: (a: T) => A): Nil<A> {
-        return new Nil<A>()
+        return new Nil<A>();
     }
 
     pure<A>(a: A): Cons<A> {
@@ -56,15 +56,15 @@ export class Nil<T> extends List<T> {
     }
 
     ap<A, B>(this: Nil<(a: A) => B>, a: List<A>): Nil<B> {
-        return new Nil<B>()
+        return new Nil<B>();
     }
 
     wrap<A>(a: A): Cons<A> {
-        return this.pure<A>(a)
+        return this.pure<A>(a);
     }
 
     bind<A>(fn: (a: T) => List<A>): Nil<A> {
-        return new Nil<A>()
+        return new Nil<A>();
     }
 
     clone(): Nil<T> {
@@ -80,50 +80,51 @@ export class Nil<T> extends List<T> {
     }
 
     sappend(a: List<T>): List<T> {
-        return a.clone();
+        const newList = this.clone();
+        return newList.append(a);
     }
 
     mempty(): Nil<T> {
-        return new Nil<T>()
+        return new Nil<T>();
     }
 
     mappend(a: List<T>): List<T> {
-        return this.sappend(a)
+        return this.sappend(a);
     }
 
-    mconcat(): List<T> {
-        return new Nil<T>()
+    mconcat(): Nil<T> {
+        return new Nil<T>();
     }
 }
 
 export class Cons<T> extends List<T> implements NonEmpty {
     constructor(public readonly value: T, public readonly next: List<T>) {
-        super()
+        super();
     }
 
     isEmpty(): boolean {
-        return false
+        return false;
     }
 
     head(): T {
-        return this.value
+        return this.value;
     }
 
     tail(): List<T> {
-        return this.next.clone()
+        return this.next.clone();
     }
 
     length(): number {
-        return 1 + this.next.length()
+        return 1 + this.next.length();
     }
 
     filter(predict: (a: T) => boolean): List<T> {
         return predict(this.value) ?
-            new Cons<T>(this.value, this.next.filter(predict)) : this.next.filter(predict)
+            new Cons<T>(this.value, this.next.filter(predict)) : this.next.filter(predict);
     }
 
     map<A>(fn: (a: T) => A): Cons<A> {
-        return new Cons(fn(this.value), this.next.map(fn))
+        return new Cons(fn(this.value), this.next.map(fn));
     }
 
     pure<A>(a: A): Cons<A> {
@@ -131,11 +132,11 @@ export class Cons<T> extends List<T> implements NonEmpty {
     }
 
     ap<A, B>(this: Cons<(a: A) => B>, a: List<A>): List<B> {
-        return a.map(this.value)
+        return a.map(this.value);
     }
 
     wrap<A>(a: A): Cons<A> {
-        return this.pure<A>(a)
+        return this.pure<A>(a);
     }
 
     bind<A>(fn: (a: T) => List<A>): List<A> {
@@ -143,15 +144,15 @@ export class Cons<T> extends List<T> implements NonEmpty {
     }
 
     clone(): Cons<T> {
-        return new Cons<T>(this.value, this.next.clone())
+        return new Cons<T>(this.value, this.next.clone());
     }
 
     append(a: List<T>): Cons<T> {
-        return new Cons<T>(this.value, this.next.append(a))
+        return new Cons<T>(this.value, this.next.append(a));
     }
 
     fold<A>(fn: (a: A, b: T) => A, init: A): A {
-        return this.next.fold(fn, fn(init, this.value))
+        return this.next.fold(fn, fn(init, this.value));
     }
 
     sappend(a: List<T>): Cons<T> {
@@ -159,19 +160,19 @@ export class Cons<T> extends List<T> implements NonEmpty {
     }
 
     mempty(): Nil<T> {
-        return new Nil<T>()
+        return new Nil<T>();
     }
 
     mappend(a: List<T>): List<T> {
         return this.sappend(a);
     }
 
-    mconcat(this: List<List<T>>): List<T> {
+    mconcat(this: Cons<List<T>>): List<T> {
         return concat(this);
     }
 }
 
-export const isCons = <T>(a: List<T>): a is Cons<T> => a instanceof Cons
+export const isCons = <T>(a: List<T>): a is Cons<T> => a instanceof Cons;
 
 export const concat = <T> (list: Foldable<List<T>>): List<T> => {
     return list.fold((acc: List<T>, cur: List<T>) => acc.append(cur), new Nil<T>());
