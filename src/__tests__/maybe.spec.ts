@@ -36,8 +36,7 @@ describe('Maybe Monad', () => {
         });
 
         it('should return Nothing when pure is called', () => {
-            const nothing = new Nothing<number>();
-            const pureValue = nothing.pure(5);
+            const pureValue = Nothing.pure(5);
             expect(pureValue instanceof Just).toBeTruthy();
         });
 
@@ -48,8 +47,7 @@ describe('Maybe Monad', () => {
         });
 
         it('should return Nothing when wrap is called', () => {
-            const nothing = new Nothing<number>();
-            const wrapValue = nothing.wrap(10);
+            const wrapValue = Nothing.wrap(10);
             expect(wrapValue instanceof Just).toBeTruthy();
         });
 
@@ -91,8 +89,8 @@ describe('Maybe Monad', () => {
         });
 
         it('should return Just when pure is called', () => {
-            const justFive = new Just(5);
-            const pure = justFive.pure(10);
+            const pure = Just.pure(10);
+            expect(pure.value).toBe(10);
         })
 
         it('should return Just when applicative is called', () => {
@@ -103,8 +101,7 @@ describe('Maybe Monad', () => {
         });
 
         it('should return Just when wrap is called', () => {
-            const justThree = new Just(3);
-            const just = justThree.wrap('test');
+            const just = Just.wrap('test');
             expect(just.value).toBe('test');
         });
 
