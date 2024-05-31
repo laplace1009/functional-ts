@@ -1,4 +1,4 @@
-import {Cons, List, Nil} from "../classes/list";
+import {concatMap, Cons, Nil} from "../classes/list";
 
 describe('List Implementation', () => {
     describe('Nil', () => {
@@ -108,7 +108,7 @@ describe('List Implementation', () => {
         });
 
         it('monoid concat should return Nil', () => {
-            const emptyList = new Nil<number>();
+            const emptyList = new Nil<Nil<number>>();
             const mConcatList = emptyList.mconcat();
             expect(mConcatList.length()).toBe(0);
             expect(mConcatList instanceof Nil).toBe(true);
@@ -232,20 +232,17 @@ describe('List Implementation', () => {
         });
 
         it('monoid concat should return concat list', () => {
-            // const listOfList =
-            //     new Cons(new Cons<number>(1, new Nil<number>()), new Nil<Cons<number>>());
-            const list = new Cons(new Cons(1, new Nil()), new Cons(new Cons<number>(2, new Nil()), new Nil()));
-            // console.log(list.mconcat())
+            const list1 = new Cons<number>(1, new Nil());
+            const list2 = new Cons<number>(2, new Nil());
+            const list = new Cons<Cons<number>>(list1, new Cons<Cons<number>>(list2, new Nil<Cons<number>>()));
+            const mConcatList = list.mconcat();
+            expect(mConcatList.length()).toBe(2);
+        });
+
+        it('monoid concat map should return List', () => {
+            const list = new Cons(1, new Cons(2, new Cons(3, new Nil())));
+            const concatMapList = concatMap((a: number) => new Cons(a, new Cons(a, new Nil())), list);
+            expect(concatMapList.length()).toBe(6);
         })
-
-        // test('map should transform list correctly', () => {
-        //     const mappedList = list.map(x => x * 2);
-        //     expect(mappedList.toArray()).toEqual([2, 4, 6]);
-        // });
-
-        // test('bind should apply function and flatten', () => {
-        //     const boundList = list.bind(x => new Cons(x + 1, new Nil()));
-        //     expect(boundList.toArray()).toEqual([2, 3, 4]);
-        // });
     });
 });

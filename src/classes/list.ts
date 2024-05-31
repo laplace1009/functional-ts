@@ -20,7 +20,7 @@ export abstract class List<T> implements Monad<T>, Foldable<T>, Monoid<T> {
     abstract sappend(a: List<T>): List<T>
     abstract mempty(): List<T>
     abstract mappend(a: List<T>): List<T>
-    abstract mconcat(this: List<List<T>>): List<T>
+    abstract mconcat<U>(this: List<List<U>>): List<U>
 }
 
 export class Nil<T> extends List<T> {
@@ -92,8 +92,8 @@ export class Nil<T> extends List<T> {
         return this.sappend(a);
     }
 
-    mconcat(): Nil<T> {
-        return new Nil<T>();
+    mconcat<U>(this: Nil<Nil<U>>): Nil<U> {
+        return new Nil<U>();
     }
 }
 
@@ -167,7 +167,7 @@ export class Cons<T> extends List<T> implements NonEmpty {
         return this.sappend(a);
     }
 
-    mconcat(this: Cons<List<T>>): List<T> {
+    mconcat<U>(this: Cons<List<U>>): List<U> {
         return concat(this);
     }
 }
