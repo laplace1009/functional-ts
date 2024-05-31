@@ -80,8 +80,8 @@ export class Nil<T> extends List<T> {
         return newList.append(a);
     }
 
-    static mempty<T>(): Nil<T> {
-        return new Nil<T>();
+    static mempty<U>(): Nil<U> {
+        return new Nil<U>();
     }
 
     mappend(a: List<T>): List<T> {
@@ -151,8 +151,8 @@ export class Cons<T> extends List<T> implements NonEmpty {
         return this.append(a);
     }
 
-    static mempty<T>(): Nil<T> {
-        return new Nil<T>();
+    static mempty<U>(): Nil<U> {
+        return new Nil<U>();
     }
 
     mappend(a: List<T>): List<T> {

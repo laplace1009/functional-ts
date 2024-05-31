@@ -1,5 +1,6 @@
 import {Monad} from "../interfaces/monad";
 import {Cons, isCons, List, Nil} from "./list";
+import {SemiGroup} from "../interfaces/semigroup";
 
 export const isJust = <T>(a: Maybe<T>): a is Just<T> => a instanceof Just
 
@@ -24,9 +25,7 @@ abstract class Maybe<T> implements Monad<T> {
     abstract fromMaybe<A>(a: A): A | T
     abstract maybeToList(): List<T>
     abstract map<A>(fn: (a: T) => A): Maybe<A>
-    // abstract pure<A>(a: A): Maybe<A>
     abstract ap<A, B>(this: Maybe<(a: A) => B>, a: Maybe<A>): Maybe<B>
-    // abstract wrap<A>(a: A): Maybe<A>
     abstract bind<A>(fn: (a: T) => Maybe<A>): Maybe<A>
 }
 
@@ -115,5 +114,12 @@ export class Just<T> extends Maybe<T> {
 
     bind<A>(fn: (a: T) => Maybe<A>): Maybe<A> {
         return fn(this.value);
+    }
+
+    sappend(this: Just<SemiGroup<T>>, a: Maybe<SemiGroup<T>>): Just<SemiGroup<T>> {
+        if (isJust(a)) {
+            return new Just(this.value.sappend(a.value));
+        }
+        return new Just(this.value);
     }
 }
