@@ -63,11 +63,11 @@ export class Nothing<T> extends Maybe<T> {
         return new Nothing<B>()
     }
 
-    wrap<A>(a: A): Maybe<A> {
+    wrap<A>(a: A): Just<A> {
         return this.pure(a);
     }
 
-    bind<A>(fn: (a: T) => Nothing<A>): Nothing<A> {
+    bind<A>(fn: (a: T) => Maybe<A>): Nothing<A> {
         return new Nothing<A>()
     }
 }
@@ -109,11 +109,11 @@ export class Just<T> extends Maybe<T> {
         return a.map(this.value)
     }
 
-    wrap<A>(a: A): Maybe<A> {
+    wrap<A>(a: A): Just<A> {
         return this.pure(a);
     }
 
-    bind<A>(fn: (a: T) => Just<A>): Just<A> {
+    bind<A>(fn: (a: T) => Maybe<A>): Maybe<A> {
         return fn(this.value)
     }
 }
