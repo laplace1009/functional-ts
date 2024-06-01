@@ -1,5 +1,5 @@
-import {Product, Sum} from "../classes/numeric";
 import {Cons, mconcat, Nil} from "../classes/list";
+import {Product, Sum} from "../classes/numeric";
 
 describe('Numeric', () => {
     describe('Sum', () => {
@@ -10,7 +10,7 @@ describe('Numeric', () => {
         });
 
         it('monoid empty should return Sum(0)', () => {
-            const emptySum = Sum.mempty();
+            const emptySum = Sum.empty();
             expect(emptySum).toEqual(new Sum(0));
         });
 
@@ -23,7 +23,7 @@ describe('Numeric', () => {
 
         it('monoid concat should return Sum', () => {
             const sumList = new Cons<Sum>(new Sum(1), new Cons(new Sum(2), new Nil()));
-            const mConcatSum = mconcat<Sum>(sumList, Sum.mempty())
+            const mConcatSum = mconcat<Sum>(sumList, Sum.empty());
             expect(mConcatSum.value).toBe(3);
         });
     });
@@ -36,7 +36,7 @@ describe('Numeric', () => {
         });
 
         it('monoid empty should return Product(1)', () => {
-            const emptyProduct = Product.mempty();
+            const emptyProduct = Product.empty();
             expect(emptyProduct).toEqual(new Product(1));
         });
 
@@ -48,7 +48,7 @@ describe('Numeric', () => {
 
         it('monoid concat should return Sum', () => {
             const productList = new Cons<Product>(new Product(3), new Cons(new Product(4), new Nil()));
-            const t = mconcat<Product>(productList, Product.mempty());
+            const t = mconcat<Product>(productList, Product.empty());
             expect(t.value).toBe(12);
         });
     });

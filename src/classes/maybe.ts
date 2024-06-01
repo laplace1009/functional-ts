@@ -1,10 +1,10 @@
 import {Monad} from "../interfaces/monad";
 import {Cons, isCons, List, Nil} from "./list";
-import {SemiGroup} from "../interfaces/semigroup";
+import {Monoid} from "../interfaces/monoid";
 
 export const isJust = <T>(a: Maybe<T>): a is Just<T> => a instanceof Just
 
-abstract class Maybe<T> implements Monad<T> {
+abstract class Maybe<T> implements Monad<T>, Monoid<T> {
     static catMaybes<T>(a: List<Maybe<T>>): List<T> {
         const helper = (acc: List<T>, cur: List<Maybe<T>>): List<T> => {
             if (isCons(cur)) {
@@ -25,8 +25,13 @@ abstract class Maybe<T> implements Monad<T> {
     abstract fromMaybe<A>(a: A): A | T
     abstract maybeToList(): List<T>
     abstract map<A>(fn: (a: T) => A): Maybe<A>
+    abstract pure<A>(a: A): Maybe<A>
     abstract ap<A, B>(this: Maybe<(a: A) => B>, a: Maybe<A>): Maybe<B>
+    abstract wrap<A>(a: A): Maybe<A>
     abstract bind<A>(fn: (a: T) => Maybe<A>): Maybe<A>
+    abstract sappend(a: Maybe<T>): Maybe<T>
+    abstract mempty(): Maybe<T>
+    abstract mappend(a: Maybe<T>): Maybe<T>
 }
 
 export class Nothing<T> extends Maybe<T> {
@@ -54,7 +59,7 @@ export class Nothing<T> extends Maybe<T> {
         return new Nothing<A>();
     }
 
-    static pure<A>(a: A): Just<A> {
+    pure<A>(a: A): Just<A> {
         return new Just<A>(a);
     }
 
@@ -62,12 +67,27 @@ export class Nothing<T> extends Maybe<T> {
         return new Nothing<B>();
     }
 
-    static wrap<A>(a: A): Just<A> {
+    wrap<A>(a: A): Just<A> {
         return this.pure(a);
     }
 
     bind<A>(fn: (a: T) => Maybe<A>): Nothing<A> {
         return new Nothing<A>();
+    }
+
+    sappend(a: Maybe<T>): Maybe<T> {
+        if (isJust(a)) {
+            return new Just<T>(a.value);
+        }
+        return new Nothing<T>();
+    }
+
+    mempty(): Maybe<T> {
+        return new Nothing<T>();
+    }
+
+    mappend(a: Maybe<T>): Maybe<T> {
+        return this.sappend(a);
     }
 }
 
@@ -100,7 +120,7 @@ export class Just<T> extends Maybe<T> {
         return new Just<A>(fn(this.value));
     }
 
-    static pure<A>(a: A): Just<A> {
+    pure<A>(a: A): Just<A> {
         return new Just<A>(a);
     }
 
@@ -108,7 +128,7 @@ export class Just<T> extends Maybe<T> {
         return a.map(this.value);
     }
 
-    static wrap<A>(a: A): Just<A> {
+    wrap<A>(a: A): Just<A> {
         return this.pure(a);
     }
 
@@ -116,10 +136,20 @@ export class Just<T> extends Maybe<T> {
         return fn(this.value);
     }
 
-    sappend(this: Just<SemiGroup<T>>, a: Maybe<SemiGroup<T>>): Just<SemiGroup<T>> {
+    sappend(a: Maybe<T>): Maybe<T> {
         if (isJust(a)) {
-            return new Just(this.value.sappend(a.value));
+            return new Just<T>(mappend(this.value, a));
         }
-        return new Just(this.value);
+        return new Just<T>(this.value);
+    }
+
+    mempty(): Nothing<T> {
+        return new Nothing<T>()
+    }
+
+    mappend(a: Maybe<T>): Maybe<T> {
+        return this.sappend(a);
     }
 }
+
+const mappend = (a: any, b: any) => a.mappend(b.value)

@@ -1,4 +1,4 @@
-import {concatMap, Cons, mconcat, Nil} from "../classes/list";
+import {concatMap, Cons, Nil} from "../classes/list";
 
 describe('List Implementation', () => {
     describe('Nil', () => {
@@ -41,7 +41,8 @@ describe('List Implementation', () => {
         });
 
         it('pure should return Cons', () => {
-            const newList = Nil.pure('here');
+            const emptyList = new Nil<number>();
+            const newList = emptyList.pure('here');
             expect(typeof newList.value).toBe('string');
         })
 
@@ -53,7 +54,8 @@ describe('List Implementation', () => {
         });
 
         it('wrap should return Cons', () => {
-            const wrapList = Nil.wrap('str');
+            const emptyList = new Nil<number>();
+            const wrapList = emptyList.wrap('str');
             expect(wrapList.length()).toBe(1);
         });
 
@@ -91,7 +93,8 @@ describe('List Implementation', () => {
         });
 
         it('monoid empty should return Nil', () => {
-            const mEmptyList = Nil.mempty<number>();
+            const emptyList = new Nil<number>();
+            const mEmptyList = emptyList.mempty();
             expect(mEmptyList.length()).toBe(0);
             expect(mEmptyList instanceof Nil).toBe(true);
         });
@@ -106,7 +109,8 @@ describe('List Implementation', () => {
 
         it('monoid concat should return Nil', () => {
             const emptyList = new Nil<Nil<number>>();
-            const mConcatList = mconcat(emptyList, new Nil<Nil<number>>());
+            const mConcatList = emptyList.mconcat();
+            expect(mConcatList.length()).toBe(0);
             expect(mConcatList instanceof Nil).toBe(true);
         });
     });
@@ -154,7 +158,8 @@ describe('List Implementation', () => {
         });
 
         it('pure should return Cons', () => {
-            const pureList = Cons.pure(5);
+            const list = new Cons(1, new Nil<number>());
+            const pureList = list.pure(5);
             expect(pureList.length()).toBe(1);
         });
 
@@ -168,7 +173,8 @@ describe('List Implementation', () => {
         });
 
         it('wrap should return Cons', () => {
-            const wrapList = Cons.wrap('here');
+            const list = new Cons(1, new Nil());
+            const wrapList = list.wrap('here');
             expect(wrapList.length()).toBe(1);
         });
 
@@ -209,7 +215,8 @@ describe('List Implementation', () => {
         });
 
         it('monoid empty should return Nil', () => {
-            const mEmptyList = Cons.mempty<number>();
+            const list = new Cons(1, new Cons(2, new Cons(3, new Nil())));
+            const mEmptyList = list.mempty();
             expect(mEmptyList.length()).toBe(0);
             expect(mEmptyList instanceof Nil).toBe(true);
         });
@@ -228,14 +235,14 @@ describe('List Implementation', () => {
             const list1 = new Cons<number>(1, new Nil());
             const list2 = new Cons<number>(2, new Nil());
             const list = new Cons<Cons<number>>(list1, new Cons<Cons<number>>(list2, new Nil<Cons<number>>()));
-            const mConcatList: Cons<number> = mconcat(list, new Nil());
-            expect(mConcatList.value).toBe(1);
+            const mConcatList = list.mconcat();
+            expect(mConcatList.length()).toBe(2);
         });
 
         it('monoid concat map should return List', () => {
             const list = new Cons(1, new Cons(2, new Cons(3, new Nil())));
             const concatMapList = concatMap((a: number) => new Cons(a, new Cons(a, new Nil())), list);
             expect(concatMapList.length()).toBe(6);
-        });
+        })
     });
 });

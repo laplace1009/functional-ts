@@ -10,13 +10,17 @@ export abstract class List<T> implements Monad<T>, Foldable<T>, Monoid<T> {
     abstract length(): number
     abstract filter(predict: (a: T) => boolean): List<T>
     abstract map<A>(fn: (a: T) => A): List<A>
+    abstract pure<A>(a: A): List<A>
     abstract ap<A, B>(this: List<(a: A) => B>, a: List<A>): List<B>
+    abstract wrap<A>(a: A): List<A>
     abstract bind<A>(fn: (a: T) => List<A>): List<A>
     abstract clone(): List<T>
     abstract append(a: List<T>): List<T>
     abstract fold<A>(fn: (a: A, b: T) => A, init: A): A
     abstract sappend(a: List<T>): List<T>
+    abstract mempty(): List<T>
     abstract mappend(a: List<T>): List<T>
+    abstract mconcat<U>(this: List<List<U>>): List<U>
 }
 
 export class Nil<T> extends List<T> {
@@ -47,16 +51,16 @@ export class Nil<T> extends List<T> {
         return new Nil<A>();
     }
 
-    static pure<T>(a: T): Cons<T> {
-        return new Cons<T>(a, new Nil<T>());
+    pure<A>(a: A): Cons<A> {
+        return new Cons<A>(a, new Nil<A>());
     }
 
     ap<A, B>(this: Nil<(a: A) => B>, a: List<A>): Nil<B> {
         return new Nil<B>();
     }
 
-    static wrap<A>(a: A): Cons<A> {
-        return this.pure(a);
+    wrap<A>(a: A): Cons<A> {
+        return this.pure<A>(a);
     }
 
     bind<A>(fn: (a: T) => List<A>): Nil<A> {
@@ -80,12 +84,16 @@ export class Nil<T> extends List<T> {
         return newList.append(a);
     }
 
-    static mempty<U>(): Nil<U> {
-        return new Nil<U>();
+    mempty(): Nil<T> {
+        return new Nil<T>();
     }
 
     mappend(a: List<T>): List<T> {
         return this.sappend(a);
+    }
+
+    mconcat<U>(this: Nil<Nil<U>>): Nil<U> {
+        return new Nil<U>();
     }
 }
 
@@ -119,7 +127,7 @@ export class Cons<T> extends List<T> implements NonEmpty {
         return new Cons(fn(this.value), this.next.map(fn));
     }
 
-    static pure<A>(a: A): Cons<A> {
+    pure<A>(a: A): Cons<A> {
         return new Cons<A>(a, new Nil<A>());
     }
 
@@ -127,7 +135,7 @@ export class Cons<T> extends List<T> implements NonEmpty {
         return a.map(this.value);
     }
 
-    static wrap<A>(a: A): Cons<A> {
+    wrap<A>(a: A): Cons<A> {
         return this.pure<A>(a);
     }
 
@@ -151,12 +159,16 @@ export class Cons<T> extends List<T> implements NonEmpty {
         return this.append(a);
     }
 
-    static mempty<U>(): Nil<U> {
-        return new Nil<U>();
+    mempty(): Nil<T> {
+        return new Nil<T>();
     }
 
     mappend(a: List<T>): List<T> {
         return this.sappend(a);
+    }
+
+    mconcat<U>(this: Cons<List<U>>): List<U> {
+        return concat(this);
     }
 }
 
@@ -168,8 +180,4 @@ export const concat = <T> (list: Foldable<List<T>>): List<T> => {
 
 export const concatMap = <T, U> (fn: (a: T) => List<U>, list: Foldable<T>): List<U> => {
     return list.fold((acc: List<U>, cur: T) => acc.append(fn(cur)), new Nil<U>())
-}
-
-export const mconcat = <T> (list: List<Monoid<T>>, init: Monoid<T>): T => {
-    return list.fold((acc: Monoid<T>, cur: Monoid<T>) => acc.mappend(cur), init) as T;
 }

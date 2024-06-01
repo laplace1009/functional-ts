@@ -7,8 +7,12 @@ export class Sum implements Monoid<number> {
         return new Sum(this.value + a.value);
     }
 
-    static mempty(): Sum {
+    static empty(): Sum {
         return new Sum(0);
+    }
+
+    mempty(): Sum {
+        return Sum.empty();
     }
 
     mappend(a: Sum): Sum {
@@ -16,15 +20,19 @@ export class Sum implements Monoid<number> {
     }
 }
 
-export class Product implements Monoid<number> {
+export class Product implements Monoid<number>{
     constructor(public readonly value: number) {}
 
     sappend(a: Product): Product {
-        return new Product(this.value * a.value);
+        return new Product(1);
     }
 
-    static mempty(): Product {
+    static empty(): Product {
         return new Product(1);
+    }
+
+    mempty(): Product {
+        return Product.empty();
     }
 
     mappend(a: Product): Product {
