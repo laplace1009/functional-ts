@@ -73,6 +73,8 @@ export class Nothing<T> extends Maybe<T> {
         return new Nothing<A>();
     }
 
+    sappend(a: Nothing<T>): Nothing<T>
+    sappend(a: Just<T>): Just<T>
     sappend(a: Maybe<T>): Maybe<T> {
         if (isJust(a)) {
             return new Just<T>(a.value);
@@ -84,8 +86,13 @@ export class Nothing<T> extends Maybe<T> {
         return new Nothing<T>();
     }
 
+    mappend(a: Nothing<T>): Nothing<T>
+    mappend(a: Just<T>): Just<T>
     mappend(a: Maybe<T>): Maybe<T> {
-        return this.sappend(a);
+        if (isJust(a)) {
+            return new Just<T>(a.value);
+        }
+        return new Nothing<T>();
     }
 }
 
@@ -134,7 +141,7 @@ export class Just<T> extends Maybe<T> {
         return fn(this.value);
     }
 
-    sappend(a: Maybe<T>): Maybe<T> {
+    sappend(a: Maybe<T>): Just<T> {
         if (isJust(a)) {
             return new Just<T>(mappend(this.value, a));
         }
@@ -142,12 +149,14 @@ export class Just<T> extends Maybe<T> {
     }
 
     mempty(): Nothing<T> {
-        return new Nothing<T>()
+        return new Nothing<T>();
     }
 
+    mappend(a: Nothing<T>): Just<T>
+    mappend(a: Just<T>): Just<T>
     mappend(a: Maybe<T>): Maybe<T> {
         return this.sappend(a);
     }
 }
 
-const mappend = (a: any, b: any) => a.mappend(b.value)
+const mappend = (a: any, b: any) => a.mappend(b.value);

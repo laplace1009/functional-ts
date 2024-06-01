@@ -24,7 +24,7 @@ export class Product implements Monoid<number>{
     constructor(public readonly value: number) {}
 
     sappend(a: Product): Product {
-        return new Product(1);
+        return new Product(this.value * a.value);
     }
 
     static empty(): Product {

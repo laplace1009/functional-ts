@@ -1,5 +1,6 @@
 import {Just, Nothing} from "../classes/maybe";
 import {Cons, Nil} from "../classes/list";
+import {Product, Sum} from "../classes/numeric";
 
 describe('Maybe Monad', () => {
     describe('Nothing', () => {
@@ -56,6 +57,28 @@ describe('Maybe Monad', () => {
             const bound = nothing.bind<number>(x => new Just(x * 2));
             expect(bound instanceof Nothing).toBeTruthy();
         });
+
+        it('should return Nothing semigroup append with Numeric', () => {
+            const nothingSum = new Nothing<Sum>();
+            const justSum = new Just<Sum>(new Sum(1));
+            const sAppendSum = nothingSum.sappend(justSum);
+            expect(sAppendSum.value.value).toBe(1);
+            const nothingProduct = new Nothing<Product>();
+            const justProduct = new Just<Product>(new Product(11));
+            const sAppendProduct = nothingProduct.sappend(justProduct);
+            expect(sAppendProduct.value.value).toBe(11);
+        });
+
+        it('should return Nothing monoid append with Numeric', () => {
+            const nothingSum = new Nothing<Sum>();
+            const justSum = new Just<Sum>(new Sum(1));
+            const mAppendSum = nothingSum.mappend(justSum);
+            expect(mAppendSum.value.value).toBe(1);
+            const nothingProduct = new Nothing<Product>();
+            const justProduct = new Just<Product>(new Product(11));
+            const mAppendProduct = nothingProduct.mappend(justProduct);
+            expect(mAppendProduct.value.value).toBe(11);
+        });
     });
 
     describe('Just', () => {
@@ -109,6 +132,40 @@ describe('Maybe Monad', () => {
             const justFive = new Just(5);
             const bound = justFive.bind(x => new Just(x * 2));
             expect(bound instanceof Just).toBeTruthy();
+        });
+
+        it('should return Just when semigroup append with numeric', () => {
+            const just = new Just<Sum>(new Sum(3));
+            const nothing = new Nothing<Sum>();
+            const justSum = new Just<Sum>(new Sum(4));
+            const res1= just.sappend(nothing);
+            const res2 = just.sappend(justSum);
+            expect(res1.value.value).toBe(3);
+            expect(res2.value.value).toBe(7);
+        });
+
+        it('should return Just monoid empty with Numeric', () => {
+            const justSumEmpty = new Just<Sum>(Sum.empty());
+            expect(justSumEmpty.value.value).toBe(0);
+            const justProductEmpty = new Just<Product>(Product.empty());
+            expect(justProductEmpty.value.value).toBe(1);
+        });
+
+        it('should return Just monoid append with Numeric', () => {
+            const justSum = new Just<Sum>(new Sum(1));
+            const nothingSum = new Nothing<Sum>();
+            const anotherJustSum = new Just<Sum>(new Sum(3));
+            const mAppendNothingSum = justSum.mappend(nothingSum);
+            const mAppendJustSum = justSum.mappend(anotherJustSum);
+            expect(mAppendNothingSum.value.value).toBe(1);
+            expect(mAppendJustSum.value.value).toBe(4);
+            const justProduct = new Just<Product>(new Product(3));
+            const nothingProduct = new Nothing<Product>();
+            const anotherJustProduct = new Just<Product>(new Sum(3));
+            const mAppendNothingProduct = justProduct.mappend(nothingProduct);
+            const mAppendJustProduct = justProduct.mappend(anotherJustProduct);
+            expect(mAppendNothingProduct.value.value).toBe(3);
+            expect(mAppendJustProduct.value.value).toBe(9);
         });
     });
 });
