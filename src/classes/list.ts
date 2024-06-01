@@ -181,3 +181,7 @@ export const concat = <T> (list: Foldable<List<T>>): List<T> => {
 export const concatMap = <T, U> (fn: (a: T) => List<U>, list: Foldable<T>): List<U> => {
     return list.fold((acc: List<U>, cur: T) => acc.append(fn(cur)), new Nil<U>())
 }
+
+export const mconcat = <T> (list: List<Monoid<T>>, init: Monoid<T>): T => {
+    return list.fold((acc: Monoid<T>, cur: Monoid<T>) => acc.mappend(cur), init) as T;
+}

@@ -25,9 +25,7 @@ abstract class Maybe<T> implements Monad<T>, Monoid<T> {
     abstract fromMaybe<A>(a: A): A | T
     abstract maybeToList(): List<T>
     abstract map<A>(fn: (a: T) => A): Maybe<A>
-    abstract pure<A>(a: A): Maybe<A>
     abstract ap<A, B>(this: Maybe<(a: A) => B>, a: Maybe<A>): Maybe<B>
-    abstract wrap<A>(a: A): Maybe<A>
     abstract bind<A>(fn: (a: T) => Maybe<A>): Maybe<A>
     abstract sappend(a: Maybe<T>): Maybe<T>
     abstract mempty(): Maybe<T>
@@ -59,7 +57,7 @@ export class Nothing<T> extends Maybe<T> {
         return new Nothing<A>();
     }
 
-    pure<A>(a: A): Just<A> {
+    static pure<A>(a: A): Just<A> {
         return new Just<A>(a);
     }
 
@@ -67,7 +65,7 @@ export class Nothing<T> extends Maybe<T> {
         return new Nothing<B>();
     }
 
-    wrap<A>(a: A): Just<A> {
+    static wrap<A>(a: A): Just<A> {
         return this.pure(a);
     }
 
@@ -120,7 +118,7 @@ export class Just<T> extends Maybe<T> {
         return new Just<A>(fn(this.value));
     }
 
-    pure<A>(a: A): Just<A> {
+    static pure<A>(a: A): Just<A> {
         return new Just<A>(a);
     }
 
@@ -128,7 +126,7 @@ export class Just<T> extends Maybe<T> {
         return a.map(this.value);
     }
 
-    wrap<A>(a: A): Just<A> {
+    static wrap<A>(a: A): Just<A> {
         return this.pure(a);
     }
 
