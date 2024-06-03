@@ -1,10 +1,11 @@
 import {Monad} from "../interfaces/monad";
 import {Cons, isCons, List, Nil} from "./list";
 import {Monoid} from "../interfaces/monoid";
+import {Foldable} from "../interfaces/foldable";
 
 export const isJust = <T>(a: Maybe<T>): a is Just<T> => a instanceof Just
 
-abstract class Maybe<T> implements Monad<T>, Monoid<T> {
+abstract class Maybe<T> implements Monad<T>, Monoid<T>, Foldable<T> {
     static catMaybes<T>(a: List<Maybe<T>>): List<T> {
         const helper = (acc: List<T>, cur: List<Maybe<T>>): List<T> => {
             if (isCons(cur)) {
@@ -30,6 +31,7 @@ abstract class Maybe<T> implements Monad<T>, Monoid<T> {
     abstract sappend(a: Maybe<T>): Maybe<T>
     abstract mempty(): Maybe<T>
     abstract mappend(a: Maybe<T>): Maybe<T>
+    abstract fold<A>(fn: (a: A, b: T) => A, init: A): A
 }
 
 export class Nothing<T> extends Maybe<T> {
@@ -94,6 +96,10 @@ export class Nothing<T> extends Maybe<T> {
         }
         return new Nothing<T>();
     }
+
+    fold<A>(fn: (a: A, b: T) => A, init: A): A {
+        return init;
+    }
 }
 
 export class Just<T> extends Maybe<T> {
@@ -156,6 +162,10 @@ export class Just<T> extends Maybe<T> {
     mappend(a: Just<T>): Just<T>
     mappend(a: Maybe<T>): Maybe<T> {
         return this.sappend(a);
+    }
+
+    fold<A>(fn: (acc: A, b: T) => A, init: A): A {
+        return fn(init, this.value);
     }
 }
 
