@@ -36,6 +36,7 @@ export class Node<T> extends Tree<T> {
         return new Node<A>(fn(this.label).label, this.subForest.map((a: Node<T>) => a.bind(fn)))
     }
 
+    // Tree's fold method using DFS
     fold<A>(fn: (acc: A, cur: T) => A, init: A): A {
         const childrenFold:A = this.subForest.fold((acc:A, cur: Node<T>) => fn(acc, cur.label), init);
         return fn(childrenFold, this.label);

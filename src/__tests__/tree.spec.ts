@@ -50,7 +50,7 @@ describe('Tree', () => {
             expect(bind.subForest.length()).toBe(2);
         });
 
-        it('fold should return new type', () => {
+        it('fold should return number', () => {
             const rCNode = new Node<number>(2, new Nil);
             const lCNode = new Node<number>(3, new Nil);
             const rootNode =
@@ -58,6 +58,16 @@ describe('Tree', () => {
                     new Cons<Node<number>>(lCNode, new Cons<Node<number>>(rCNode, new Nil)));
             const foldTree = rootNode.fold((acc, cur) => acc + cur, 0);
             expect(foldTree).toBe(6);
+        });
+
+        it('fold should return string', () => {
+            const rCNode = new Node<string>('lo', new Nil);
+            const lCNode = new Node<string>('el', new Nil);
+            const rootNode =
+                new Node<string>(' world',
+                    new Cons<Node<string>>(lCNode, new Cons<Node<string>>(rCNode, new Nil)));
+            const foldTree = rootNode.fold((acc, cur) => acc + cur, 'h');
+            expect(foldTree).toEqual('hello world');
         });
     });
 });
