@@ -19,6 +19,12 @@ abstract class Maybe<T> implements Monad<T>, Monoid<T>, Foldable<T> {
         }
         return helper(new Nil<T>(), a);
     }
+    static maybe<T, A>(b: A, fn: (a: T) => A, a: Maybe<T>): A {
+        if (isJust(a)) {
+            return fn(a.value);
+        }
+        return b;
+    }
 
     abstract isNothing(): boolean
     abstract isJust(): boolean
