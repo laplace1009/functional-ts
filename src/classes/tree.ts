@@ -1,12 +1,14 @@
 import {Monad} from "../interfaces/monad";
 import {List, Nil} from "./list";
+import {Foldable} from "../interfaces/foldable";
 
-export abstract class Tree<T> implements Monad<T> {
+export abstract class Tree<T> implements Monad<T>, Foldable<T> {
     abstract map<A>(fn: (a: T) => A): Tree<A>
     abstract pure<A>(a: A): Tree<A>
     abstract ap<A, B>(this: Tree<(a: A) => B>, a: Tree<A>): Tree<B>
     abstract wrap<A>(a: A): Tree<A>
     abstract bind<A>(fn: (a: T) => Tree<A>): Tree<A>
+    abstract fold<A>(fn: (acc: A, cur: T) => A, init: A): A
 }
 
 export class Node<T> extends Tree<T> {
@@ -33,4 +35,12 @@ export class Node<T> extends Tree<T> {
     bind<A>(fn: (a: T) => Node<A>): Node<A> {
         return new Node<A>(fn(this.label).label, this.subForest.map((a: Node<T>) => a.bind(fn)))
     }
+
+    fold<A>(fn: (acc: A, cur: T) => A, init: A): A {
+        const childrenFold:A = this.subForest.fold((acc:A, cur: Node<T>) => fn(acc, cur.label), init);
+        return fn(childrenFold, this.label);
+    }
 }
+
+
+

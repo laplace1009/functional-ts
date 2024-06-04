@@ -49,5 +49,15 @@ describe('Tree', () => {
             expect(bind.label).toEqual(4);
             expect(bind.subForest.length()).toBe(2);
         });
+
+        it('fold should return new type', () => {
+            const rCNode = new Node<number>(2, new Nil);
+            const lCNode = new Node<number>(3, new Nil);
+            const rootNode =
+                new Node<number>(1,
+                    new Cons<Node<number>>(lCNode, new Cons<Node<number>>(rCNode, new Nil)));
+            const foldTree = rootNode.fold((acc, cur) => acc + cur, 0);
+            expect(foldTree).toBe(6);
+        });
     });
 });
